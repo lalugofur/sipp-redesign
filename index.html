@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIPP - Cek Status Perkara Anda</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        /* Main Card */
+        .main-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            background: #f8f9fa;
+            padding: 8px;
+            gap: 8px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            background: transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        /* Content Area */
+        .content {
+            padding: 40px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Info Banner */
+        .info-banner {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: start;
+            gap: 12px;
+        }
+
+        .info-banner svg {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .info-banner-content h3 {
+            font-size: 1rem;
+            color: #1976D2;
+            margin-bottom: 6px;
+        }
+
+        .info-banner-content p {
+            font-size: 0.9rem;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        /* Search Options */
+        .search-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .search-option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-option:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .search-option.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .search-option-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .search-option-icon {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-option h3 {
+            font-size: 1rem;
+            color: #212529;
+        }
+
+        .search-option p {
+            font-size: 0.85rem;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+
+        /* Form Group */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-help {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Button */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Help Section */
+        .help-section {
+            background: #fff8e1;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .help-section h3 {
+            color: #f57c00;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .help-list {
+            list-style: none;
+        }
+
+        .help-list li {
+            padding: 8px 0;
+            color: #666;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: start;
+            gap: 10px;
+        }
+
+        .help-list li:before {
+            content: "→";
+            color: #f57c00;
+            font-weight: bold;
+        }
+
+        /* FAQ Section */
+        .faq-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            background: #e9ecef;
+        }
+
+        .faq-question {
+            font-weight: 600;
+            color: #212529;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-answer {
+            margin-top: 12px;
+            color: #6c757d;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            display: none;
+        }
+
+        .faq-item.open .faq-answer {
+            display: block;
+        }
+
+        /* Contact Support */
+        .contact-support {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .contact-support h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+
+        .contact-support p {
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .contact-methods {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .contact-method {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px 24px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            padding-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .content {
+                padding: 24px;
+            }
+
+            .tab-btn {
+                font-size: 0.9rem;
+                padding: 12px;
+            }
+
+            .search-options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ SIPP</h1>
+            <p>Cek Status Perkara Anda dengan Mudah</p>
+        </div>
+
+        <div class="main-card">
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="switchTab('cek-perkara')">
+                    🔍 Cek Perkara
+                </button>
+                <button class="tab-btn" onclick="switchTab('panduan')">
+                    📖 Panduan
+                </button>
+                <button class="tab-btn" onclick="switchTab('bantuan')">
+                    💬 Bantuan
+                </button>
+            </div>
+
+            <div class="content">
+                <!-- Tab 1: Cek Perkara -->
+                <div id="tab-cek-perkara" class="tab-content active">
+                    <div class="info-banner">
+                        <svg fill="#2196F3" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                        <div class="info-banner-content">
+                            <h3>Pilih cara pencarian yang paling mudah untuk Anda</h3>
+                            <p>Anda bisa mencari perkara dengan nomor perkara, nama lengkap, atau KTP. Pilih salah satu yang datanya Anda miliki.</p>
+                        </div>
+                    </div>
+
+                    <div class="search-options">
+                        <div class="search-option selected" onclick="selectSearchOption(this, 'nomor')">
+                            <div class="search-option-header">
+                                <div class="search-option-icon">
+                                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                                        <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+                                    </svg>
+                                </div>
+                                <h3>Nomor Perkara</h3>
+                            </div>
+                            <p>Cari menggunakan nomor perkara yang Anda terima dari pengadilan</p>
+                        </div>
+
+                        <div class="search-option" onclick="selectSearchOption(this, 'nama')">
+                            <div class="search-option-header">
+                                <div class="search-option-icon">
+                                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                    </svg>
+                                </div>
+                                <h3>Nama Lengkap</h3>
+                            </div>
+                            <p>Cari menggunakan nama lengkap yang terdaftar di perkara</p>
+                        </div>
+
+                        <div class="search-option" onclick="selectSearchOption(this, 'ktp')">
+                            <div class="search-option-header">
+                                <div class="search-option-icon">
+                                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                                        <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h2v2H6zm0 4h8v2H6zm10-4h2v6h-2z"/>
+                                    </svg>
+                                </div>
+                                <h3>Nomor KTP</h3>
+                            </div>
+                            <p>Cari menggunakan nomor KTP yang terdaftar</p>
+                        </div>
+                    </div>
+
+                    <form id="searchForm">
+                        <div id="form-nomor" class="search-form">
+                            <div class="form-group">
+                                <label>Nomor Perkara</label>
+                                <input type="text" placeholder="Contoh: 123/Pdt.G/2024/PN.Jkt.Pst" />
+                                <p class="form-help">
+                                    <svg width="16" height="16" fill="#6c757d" viewBox="0 0 24 24">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                    </svg>
+                                    Format nomor biasanya ditulis di surat panggilan atau dokumen resmi
+                                </p>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Pengadilan (Opsional)</label>
+                                <select>
+                                    <option>Semua Pengadilan</option>
+                                    <option>PN Jakarta Pusat</option>
+                                    <option>PN Jakarta Selatan</option>
+                                    <option>PN Jakarta Timur</option>
+                                    <option>PN Jakarta Barat</option>
+                                    <option>PN Jakarta Utara</option>
+                                    <option>PN Surabaya</option>
+                                    <option>PN Bandung</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="form-nama" class="search-form" style="display: none;">
+                            <div class="form-group">
+                                <label>Nama Lengkap</label>
+                                <input type="text" placeholder="Masukkan nama lengkap sesuai KTP" />
+                                <p class="form-help">
+                                    <svg width="16" height="16" fill="#6c757d" viewBox="0 0 24 24">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                    </svg>
+                                    Tulis nama persis seperti di KTP atau dokumen resmi
+                                </p>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Pengadilan</label>
+                                <select>
+                                    <option>Pilih Pengadilan</option>
+                                    <option>PN Jakarta Pusat</option>
+                                    <option>PN Jakarta Selatan</option>
+                                    <option>PN Jakarta Timur</option>
+                                    <option>PN Jakarta Barat</option>
+                                    <option>PN Jakarta Utara</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Tahun Perkara (Opsional)</label>
+                                <input type="number" placeholder="Contoh: 2024" />
+                            </div>
+                        </div>
+
+                        <div id="form-ktp" class="search-form" style="display: none;">
+                            <div class="form-group">
+                                <label>Nomor KTP (NIK)</label>
+                                <input type="text" placeholder="Masukkan 16 digit nomor KTP" maxlength="16" />
+                                <p class="form-help">
+                                    <svg width="16" height="16" fill="#6c757d" viewBox="0 0 24 24">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                    </svg>
+                                    Data Anda aman dan terenkripsi
+                                </p>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Pengadilan</label>
+                                <select>
+                                    <option>Pilih Pengadilan</option>
+                                    <option>PN Jakarta Pusat</option>
+                                    <option>PN Jakarta Selatan</option>
+                                    <option>PN Jakarta Timur</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary">
+                            🔍 Cari Perkara Saya
+                        </button>
+                    </form>
+
+                    <div class="help-section">
+                        <h3>
+                            <svg width="20" height="20" fill="#f57c00" viewBox="0 0 24 24">
+                                <path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/>
+                            </svg>
+                            Tidak punya data di atas?
+                        </h3>
+                        <ul class="help-list">
+                            <li>Hubungi pengadilan tempat perkara Anda didaftarkan</li>
+                            <li>Minta nomor perkara ke kuasa hukum atau pengacara Anda</li>
+                            <li>Cek dokumen resmi seperti surat panggilan atau penetapan</li>
+                            <li>Chat dengan customer service kami di tab "Bantuan"</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Panduan -->
+                <div id="tab-panduan" class="tab-content">
+                    <h2 style="margin-bottom: 24px; color: #212529;">📖 Panduan Penggunaan SIPP</h2>
+                    
+                    <div class="faq-item" onclick="toggleFAQ(this)">
+                        <div class="faq-question">
+                            Apa itu SIPP?
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            SIPP (Sistem Informasi Penelusuran Perkara) adalah layanan online yang memudahkan Anda untuk mengecek status dan perkembangan perkara hukum di pengadilan tanpa harus datang langsung.
+                        </div>
+                    </div>
+
+                    <div class="faq-item" onclick="toggleFAQ(this)">
+                        <div class="faq-question">
+                            Bagaimana cara mendapatkan nomor perkara?
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Nomor perkara biasanya tertera di:<br>
+                            • Surat panggilan sidang dari pengadilan<br>
+                            • Surat penetapan atau putusan<br>
+                            • Dokumen resmi perkara lainnya<br>
+                            • Anda juga bisa menanyakan ke pengadilan atau pengacara Anda
+                        </div>
+                    </div>
+
+                    <div class="faq-item" onclick="toggleFAQ(this)">
+                        <div class="faq-question">
+                            Informasi apa saja yang bisa saya lihat?
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Anda dapat melihat:<br>
+                            • Status perkara (aktif/selesai)<br>
+                            • Jadwal sidang selanjutnya<br>
+                            • Riwayat sidang yang sudah dilakukan<br>
+                            • Tahapan proses perkara<br>
+                            • Informasi hakim dan panitera
+                        </div>
+                    </div>
+
+                    <div class="faq-item" onclick="toggleFAQ(this)">
+                        <div class="faq-question">
+                            Apakah data saya aman?
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Ya, sangat aman. Semua data Anda dienkripsi dan hanya bisa diakses oleh pihak yang berwenang. Sistem kami menggunakan standar keamanan tertinggi yang sama dengan aplikasi perbankan.
+                        </div>
+                    </div>
+
+                    <div class="faq-item" onclick="toggleFAQ(this)">
+                        <div class="faq-question">
+                            Kenapa perkara saya tidak ditemukan?
+                            <span>+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Beberapa kemungkinan:<br>
+                            • Nomor perkara yang dimasukkan salah<br>
+                            • Perkara masih dalam proses pendaftaran<br>
+                            • Pengadilan yang dipilih tidak sesuai<br>
+                            • Perkara sudah lama dan belum didigitalisasi<br>
+                            Silakan hubungi customer service jika masalah berlanjut.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Bantuan -->
+                <div id="tab-bantuan" class="tab-content">
+                    <h2 style="margin-bottom: 24px; color: #212529;">💬 Butuh Bantuan?</h2>
+                    
+                    <div class="contact-support">
+                        <h3>Tim Kami Siap Membantu</h3>
+                        <p>Hubungi kami melalui berbagai channel di bawah ini</p>
+                        <div class="contact-methods">
+                            <div class="contact-method">
+                                📞 Call Center: 1500-XXX
+                            </div>
+                            <div class="contact-method">
+                                📧 Email: bantuan@sipp.go.id
+                            </div>
+                            <div class="contact-method">
+                                💬 WhatsApp: 0812-XXXX-XXXX
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <h3 style="margin-bottom: 16px; color: #212529;">Jam Operasional</h3>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+                            <p style="margin-bottom: 8px;"><strong>Senin - Jumat:</strong> 08.00 - 17.00 WIB</p>
+                            <p style="margin-bottom: 8px;"><strong>Sabtu:</strong> 08.00 - 12.00 WIB</p>
+                            <p><strong>Minggu & Libur:</strong> Tutup</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 Mahkamah Agung Republik Indonesia</p>
+            <p style="margin-top: 8px; font-size: 0.9rem;">Melayani dengan Integritas dan Profesionalisme</p>
+        </div>
+    </div>
+
+    <script>
+        let currentSearchType = 'nomor';
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        function selectSearchOption(element, type) {
+            document.querySelectorAll('.search-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+
+            element.classList.add('selected');
+
+            document.querySelectorAll('.search-form').forEach(form => {
+                form.style.display = 'none';
+            });
+
+            document.getElementById('form-' + type).style.display = 'block';
+            currentSearchType = type;
+        }
+
+        function toggleFAQ(element) {
+            element.classList.toggle('open');
+            const span = element.querySelector('span');
+            span.textContent = element.classList.contains('open') ? '−' : '+';
+        }
+
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Fitur pencarian akan menampilkan hasil perkara. Ini adalah prototype demo.');
+        });
+    </script>
+</body>
+</html>
